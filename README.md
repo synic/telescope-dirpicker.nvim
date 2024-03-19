@@ -5,6 +5,8 @@ It allows you to pick from a list of subdirectories and either execute
 Telescope's `find_files` on that directory, or set up a custom callback to do
 whatever you want when a directory is selected.
 
+![dirpicker](https://github.com/synic/telescope-dirpicker.nvim/assets/30906/06e665e0-bf7a-4e00-bc88-1a43a5691d81)
+
 ## :question: But Why?
 
 On my machine, all of my code repositories are in `~/Projects`. I have bound
