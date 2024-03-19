@@ -66,9 +66,10 @@ require('telescope').extensions.dirpicker.dirpicker({
 
 **telescope-dirpicker.nvim** comes with the following mappings:
 
-| Normal mode | Insert mode | Action  |
-| ----------- | ----------- | ------- |
-| t           | \<c-t\>     | `:tcd`  |
-| l           | \<c-l\>     | `:lcd`  |
-| c           | \<c-c\>     | `:cd`   |
-| e           | \<c-e\>     | `:edit` |
+| Normal mode | Insert mode | Action  | Notes                              |
+| ----------- | ----------- | ------- | ---------------------------------- |
+| t           | \<c-t\>     | `:tcd`  |                                    |
+| l           | \<c-l\>     | `:lcd`  |                                    |
+| c           | \<c-c\>     | `:cd`   |                                    |
+| e           | \<c-e\>     | `:edit` |                                    |
+| d           | \<c-d\>     |         | goes to the first passed directory |

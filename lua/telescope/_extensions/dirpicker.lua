@@ -1,9 +1,4 @@
-local has_telescope, telescope = pcall(require, "telescope")
-
-if not has_telescope then
-	return
-end
-
+local telescope = require("telescope")
 local path = require("plenary.path")
 local builtin = require("telescope.builtin")
 local actions = require("telescope.actions")
@@ -40,9 +35,8 @@ local function make_display(entry)
 	return displayer({ entry.name, { entry.value, "Comment" } })
 end
 
-local function create_finder(opts)
+local function get_search_in(opts)
 	local search_in = {}
-
 	if type(opts.cwd) == "function" then
 		search_in = opts.cwd()
 	elseif type(opts.cwd) == "string" then
@@ -52,10 +46,13 @@ local function create_finder(opts)
 	else
 		table.insert(search_in, vim.loop.cwd())
 	end
+	return search_in
+end
 
+local function create_finder(opts)
 	local directories = {}
 
-	for _, dir in ipairs(search_in) do
+	for _, dir in ipairs(get_search_in(opts)) do
 		directories = table_concat(directories, get_subdirs(dir))
 	end
 
@@ -76,6 +73,19 @@ end
 local function exec_command(opts, prompt_bufnr, cmd)
 	local entry = state.get_selected_entry(prompt_bufnr)
 	local full_cmd = cmd .. " " .. entry.value
+
+	if not opts.silent then
+		vim.notify(":" .. full_cmd)
+	end
+	actions.close(prompt_bufnr)
+	vim.cmd(full_cmd)
+end
+
+local function goto_first_directory(opts, prompt_bufnr)
+	local search_in = get_search_in(opts)
+	local value = search_in[1]
+
+	local full_cmd = "edit " .. value
 
 	if not opts.silent then
 		vim.notify(":" .. full_cmd)
@@ -106,6 +116,9 @@ local function dirpicker(opts)
 				map("n", "e", function(pb)
 					exec_command(opts, pb, "edit")
 				end)
+				map("n", "d", function(pb)
+					goto_first_directory(opts, pb)
+				end)
 				map("i", "<c-t>", function(pb)
 					exec_command(opts, pb, "tcd")
 				end)
@@ -117,6 +130,9 @@ local function dirpicker(opts)
 				end)
 				map("i", "<c-e>", function(pb)
 					exec_command(opts, pb, "edit")
+				end)
+				map("i", "<c-d>", function(pb)
+					goto_first_directory(opts, pb)
 				end)
 
 				local function select()
