@@ -94,8 +94,14 @@ local function goto_first_directory(opts, prompt_bufnr)
 	vim.cmd(full_cmd)
 end
 
+local function get_default_opts()
+	return {
+		on_select = "browse_files",
+	}
+end
+
 local function dirpicker(opts)
-	opts = opts or {}
+	opts = opts or get_default_opts()
 
 	pickers
 		.new(opts, {
@@ -139,11 +145,35 @@ local function dirpicker(opts)
 					local entry = state.get_selected_entry(prompt_bufnr)
 					actions.close(prompt_bufnr)
 
-					local on_select = opts.on_select or function(dir)
+					if not opts.on_select then
+						opts.on_select = "browse_files"
+					end
+
+					local callback = function(dir)
 						builtin.find_files({ cwd = dir })
 					end
 
-					on_select(entry.value)
+					if type(opts.on_select) == "function" then
+						callback = function(dir)
+							opts.on_select(dir)
+						end
+					elseif opts.on_select == "edit" then
+						callback = function(dir)
+							vim.cmd.edit(dir)
+						end
+					elseif opts.on_select == "edit_new_tab" then
+						callback = function(dir)
+							vim.cmd.tabnew()
+							vim.cmd.edit(dir)
+						end
+					elseif opts.on_select == "browse_files_new_tab" then
+						callback = function(dir)
+							vim.cmd.tabnew()
+							builtin.find_files({ cwd = dir })
+						end
+					end
+
+					callback(entry.value)
 				end
 
 				actions.select_default:replace(select)

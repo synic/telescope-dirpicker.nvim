@@ -12,6 +12,13 @@ On my machine, all of my code repositories are in `~/Projects`. I have bound
 `<space>pp` and pick from a project. When I want to work on a new project, I
 open a new tab page and run `:Telescope dirpicker` again.
 
+Initially I used [project.nvim](https://github.com/ahmedkhalf/project.nvim),
+which I really like, however, it's got some issues and it seems like an
+abandoned project. Some of the features I need are sitting in PRs that have
+been open for over a year without any response. It also does a bunch of things
+I don't really care about. I realized that what I actually need is pretty
+simple.
+
 ## ⚡ Requirements
 
 - Neovim >= 0.5.0
@@ -62,14 +69,26 @@ require('telescope').extensions.dirpicker.dirpicker({
 })
 ```
 
-#### Mappins
+#### Mappings
 
 **telescope-dirpicker.nvim** comes with the following mappings:
 
-| Normal mode | Insert mode | Action  | Notes                              |
-| ----------- | ----------- | ------- | ---------------------------------- |
-| t           | \<c-t\>     | `:tcd`  |                                    |
-| l           | \<c-l\>     | `:lcd`  |                                    |
-| c           | \<c-c\>     | `:cd`   |                                    |
-| e           | \<c-e\>     | `:edit` |                                    |
-| d           | \<c-d\>     |         | goes to the first passed directory |
+| Normal mode | Insert mode | Action                                       |
+| ----------- | ----------- | -------------------------------------------- |
+| t           | \<c-t\>     | Change tab directory                         |
+| l           | \<c-l\>     | Change buffer directory                      |
+| c           | \<c-c\>     | Change global directory                      |
+| e           | \<c-e\>     | Edit dir in default dir editor               |
+| d           | \<c-d\>     | Edit first search dir in default dir editor  |
+
+The default "select" action is to open the directory with `:Telescope
+find_files`. You can configure this behavior by setting `on_select`
+when initiating the picker. The following options are available:
+
+| Value                      | Notes                                       |
+| -------------------------- | ------------------------------------------- |
+| `browse_files` (default)   | Execute `:Telescope browse_files`           |
+| function(entry)            | Custom callback function                    |
+| `browse_files_new_tab`     | `:Telescope browse_files` in new tab        |
+| `edit`                     | `:edit` (default file browser)              |
+| `edit_new_tab`             | `:edit` (default file browser in new tab)   |
