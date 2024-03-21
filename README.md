@@ -34,14 +34,18 @@ Install the plugin with your preferred package manager:
 
 ```lua
 {
-  'nvim-telescope/telescope.nvim',
+  "nvim-telescope/telescope.nvim",
   dependencies = {
-    'synic/telescope-dirpicker.nvim',
+    "synic/telescope-dirpicker.nvim",
   },
   config = function(_, opts)
-    local telescope = require('telescope')
+    local telescope = require("telescope")
     telescope.setup(opts)
-    telescope.load_extension('dirpicker')
+
+    -- optional, if not provided, `:Telescope dirpicker` will still work, you
+    -- won't be able to autocomplete `dirpicker` on first use if you lazy load
+    -- telescope.
+    telescope.load_extension("dirpicker")
   end,
 },
 ```
@@ -55,7 +59,7 @@ To use the directory picker
 ```
 
 ```lua
-require('telescope').extensions.dirpicker.dirpicker({ cwd = '~/Projects/' })
+require("telescope").extensions.dirpicker.dirpicker({ cwd = "~/Projects/" })
 ```
 
 The default "select" action is to open the directory with `:Telescope
@@ -63,11 +67,11 @@ find_files`. You can configure this behavior by setting `on_select`
 to a function with the signature: `function(dir)`:
 
 ```lua
-require('telescope').extensions.dirpicker.dirpicker({
-  cwd = '~/Projects/',
-  prompt_title = 'Projects',
+require("telescope").extensions.dirpicker.dirpicker({
+  cwd = "~/Projects/",
+  prompt_title = "Projects",
   on_select = function(dir)
-    vim.notify('You selected: ' .. dir)
+    vim.notify("You selected: " .. dir)
     vim.cmd.tcd(dir)
   end,
   -- on_select = vim.cmd.edit,  -- to open dir in netrw
@@ -80,8 +84,8 @@ These are the overrideable default picker configuration options:
 
 ```lua
 local opts = {
-  cwd = '.',
-  prompt_title = 'Pick a Directory',
+  cwd = ".",
+  prompt_title = "Pick a Directory",
   enable_preview = true,
   on_select = function(dir)
     require("telescope.builtin").find_files({ cwd = dir })
