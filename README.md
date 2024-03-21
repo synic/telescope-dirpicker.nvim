@@ -84,7 +84,7 @@ local opts = {
   prompt_title = 'Pick a Directory',
   enable_preview = true,
   on_select = function(dir)
-    return vim.fn.fnamemodify(dir, ':t')
+    require("telescope.builtin").find_files({ cwd = dir })
   end,
 }
 ```
