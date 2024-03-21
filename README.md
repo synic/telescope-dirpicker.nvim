@@ -74,6 +74,21 @@ require('telescope').extensions.dirpicker.dirpicker({
 })
 ```
 
+#### Picker Options
+
+These are the overrideable default picker configuration options:
+
+```lua
+local opts = {
+  cwd = '.',,
+  prompt_title = 'Pick a Directory',
+  enable_preview = true,
+  on_select = function(dir)
+    return vim.fn.fnamemodify(dir, ':t')
+  end,
+}
+```
+
 #### Mappings
 
 **telescope-dirpicker.nvim** comes with the following mappings:
@@ -85,3 +100,4 @@ require('telescope').extensions.dirpicker.dirpicker({
 | c           | \<c-c\>     | Change global directory                      |
 | e           | \<c-e\>     | Edit dir in default dir editor               |
 | d           | \<c-d\>     | Edit first search dir in default dir editor  |
+| b           | \<c-b\>     | Browse files in telescope                    |

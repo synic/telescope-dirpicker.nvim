@@ -4,6 +4,7 @@ local builtin = require("telescope.builtin")
 local actions = require("telescope.actions")
 local state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
+local previewers = require("telescope.previewers")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 
@@ -59,87 +60,97 @@ local function create_finder(opts)
 	return finders.new_table({
 		results = directories,
 		entry_maker = function(entry)
-			local display_name = vim.fn.fnamemodify(entry, ":t")
 			return {
 				display = make_display,
-				name = display_name,
+				name = opts.get_entry_display(entry),
 				value = entry,
-				ordinal = display_name .. " " .. entry,
+				ordinal = opts.get_entry_ordinal(entry),
 			}
 		end,
 	})
 end
 
-local function exec_command(opts, prompt_bufnr, cmd)
-	local entry = state.get_selected_entry(prompt_bufnr)
-	local full_cmd = cmd .. " " .. entry.value
+local function exec_cb(_, cmd)
+	return function(prompt_bufnr)
+		local entry = state.get_selected_entry(prompt_bufnr)
+		actions.close(prompt_bufnr)
 
-	if not opts.silent then
-		vim.notify(":" .. full_cmd)
+		if type(cmd) == "function" then
+			cmd(entry.value)
+			return
+		end
+
+		vim.cmd(":" .. cmd .. " " .. entry.value)
 	end
-	actions.close(prompt_bufnr)
-	vim.cmd(full_cmd)
 end
 
-local function goto_first_directory(opts, prompt_bufnr)
-	local search_in = get_search_in(opts)
-	local value = search_in[1]
+local function goto_first_directory(opts)
+	return function(prompt_bufnr)
+		local search_in = get_search_in(opts)
+		local value = search_in[1]
 
-	local full_cmd = "edit " .. value
+		local full_cmd = "edit " .. value
 
-	if not opts.silent then
-		vim.notify(":" .. full_cmd)
+		if not opts.silent then
+			vim.notify(":" .. full_cmd)
+		end
+		actions.close(prompt_bufnr)
+		vim.cmd(full_cmd)
 	end
-	actions.close(prompt_bufnr)
-	vim.cmd(full_cmd)
 end
 
 local function get_default_opts()
 	return {
 		on_select = nil,
+		get_entry_display = function(entry)
+			return vim.fn.fnamemodify(entry, ":t")
+		end,
+		get_entry_ordinal = function(entry)
+			local name = vim.fn.fnamemodify(entry, ":t")
+			return name .. " " .. entry
+		end,
 	}
 end
 
 local function dirpicker(opts)
-	opts = opts or get_default_opts()
+	opts = vim.tbl_deep_extend("force", get_default_opts(), opts)
+
+	local enable_preview = true
+	if opts.enable_preview ~= nil then
+		enable_preview = opts.enable_preview
+	end
 
 	pickers
 		.new(opts, {
 			prompt_title = opts.prompt_title or "Pick a Directory",
 			finder = create_finder(opts),
-			previewer = false,
+			previewer = enable_preview and previewers.vim_buffer_cat.new(opts) or false,
 			sorter = opts.sorter or sorters.get_fuzzy_file(),
 			attach_mappings = function(prompt_bufnr, map)
-				map("n", "t", function(pb)
-					exec_command(opts, pb, "tcd")
-				end)
-				map("n", "l", function(pb)
-					exec_command(opts, pb, "lcd")
-				end)
-				map("n", "c", function(pb)
-					exec_command(opts, pb, "cd")
-				end)
-				map("n", "e", function(pb)
-					exec_command(opts, pb, "edit")
-				end)
-				map("n", "d", function(pb)
-					goto_first_directory(opts, pb)
-				end)
-				map("i", "<c-t>", function(pb)
-					exec_command(opts, pb, "tcd")
-				end)
-				map("i", "<c-l>", function(pb)
-					exec_command(opts, pb, "lcd")
-				end)
-				map("i", "<c-c>", function(pb)
-					exec_command(opts, pb, "cd")
-				end)
-				map("i", "<c-e>", function(pb)
-					exec_command(opts, pb, "edit")
-				end)
-				map("i", "<c-d>", function(pb)
-					goto_first_directory(opts, pb)
-				end)
+				map("n", "t", exec_cb(opts, "tcd"))
+				map("n", "l", exec_cb(opts, "lcd"))
+				map("n", "c", exec_cb(opts, "cd"))
+				map("n", "e", exec_cb(opts, "edit"))
+				map("n", "d", goto_first_directory(opts))
+				map(
+					"n",
+					"b",
+					exec_cb(opts, function(d)
+						builtin.find_files({ cwd = d })
+					end)
+				)
+				map("i", "<c-t>", exec_cb(opts, "tcd"))
+				map("i", "<c-l>", exec_cb(opts, "lcd"))
+				map("i", "<c-c>", exec_cb(opts, "cd"))
+				map("i", "<c-e>", exec_cb(opts, "edit"))
+				map("i", "<c-d>", goto_first_directory(opts))
+				map(
+					"i",
+					"<c-b>",
+					exec_cb(opts, function(d)
+						builtin.find_files({ cwd = d })
+					end)
+				)
 
 				local function select()
 					local entry = state.get_selected_entry(prompt_bufnr)
