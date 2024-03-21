@@ -7,7 +7,7 @@ whatever you want when a directory is selected.
 
 ![dirpicker](https://github.com/synic/telescope-dirpicker.nvim/assets/30906/06e665e0-bf7a-4e00-bc88-1a43a5691d81)
 
-## :question: But Why?
+## But Why?
 
 On my machine, all of my code repositories are in `~/Projects`. I have bound
 `<space>pp` to `:Telescope dirpicker cwd=~/Projects`. When I load vim, I type
@@ -21,7 +21,7 @@ been open for over a year without any response. It also does a bunch of things
 I don't really care about. I realized that what I actually need is pretty
 simple.
 
-## ⚡ Requirements
+## Requirements
 
 - Neovim >= 0.5.0
 - Telescope >= 0.1.6
@@ -58,7 +58,9 @@ To use the directory picker
 require('telescope').extensions.dirpicker.dirpicker({ cwd = "~/Projects/" })
 ```
 
-With a custom select callback:
+The default "select" action is to open the directory with `:Telescope
+find_files`. You can configure this behavior by setting `on_select`
+to a function with the signature: `function(dir)`:
 
 ```lua
 require('telescope').extensions.dirpicker.dirpicker({
@@ -82,15 +84,3 @@ require('telescope').extensions.dirpicker.dirpicker({
 | c           | \<c-c\>     | Change global directory                      |
 | e           | \<c-e\>     | Edit dir in default dir editor               |
 | d           | \<c-d\>     | Edit first search dir in default dir editor  |
-
-The default "select" action is to open the directory with `:Telescope
-find_files`. You can configure this behavior by setting `on_select`
-when initiating the picker. The following options are available:
-
-| Value                      | Notes                                       |
-| -------------------------- | ------------------------------------------- |
-| `browse_files` (default)   | Execute `:Telescope browse_files`           |
-| function(entry)            | Custom callback function                    |
-| `browse_files_new_tab`     | `:Telescope browse_files` in new tab        |
-| `edit`                     | `:edit` (default file browser)              |
-| `edit_new_tab`             | `:edit` (default file browser in new tab)   |

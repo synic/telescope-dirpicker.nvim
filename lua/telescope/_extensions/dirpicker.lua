@@ -96,7 +96,7 @@ end
 
 local function get_default_opts()
 	return {
-		on_select = "browse_files",
+		on_select = nil,
 	}
 end
 
@@ -145,35 +145,11 @@ local function dirpicker(opts)
 					local entry = state.get_selected_entry(prompt_bufnr)
 					actions.close(prompt_bufnr)
 
-					if not opts.on_select then
-						opts.on_select = "browse_files"
-					end
-
-					local callback = function(dir)
-						builtin.find_files({ cwd = dir })
-					end
-
 					if type(opts.on_select) == "function" then
-						callback = function(dir)
-							opts.on_select(dir)
-						end
-					elseif opts.on_select == "edit" then
-						callback = function(dir)
-							vim.cmd.edit(dir)
-						end
-					elseif opts.on_select == "edit_new_tab" then
-						callback = function(dir)
-							vim.cmd.tabnew()
-							vim.cmd.edit(dir)
-						end
-					elseif opts.on_select == "browse_files_new_tab" then
-						callback = function(dir)
-							vim.cmd.tabnew()
-							builtin.find_files({ cwd = dir })
-						end
+						opts.on_select(entry.value)
+					else
+						builtin.find_files({ cwd = entry.value })
 					end
-
-					callback(entry.value)
 				end
 
 				actions.select_default:replace(select)
