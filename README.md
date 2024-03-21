@@ -5,7 +5,7 @@ It allows you to pick from a list of subdirectories and either execute
 Telescope's `find_files` on that directory, or set up a custom callback to do
 whatever you want when a directory is selected.
 
-![dirpicker](https://github.com/synic/telescope-dirpicker.nvim/assets/30906/06e665e0-bf7a-4e00-bc88-1a43a5691d81)
+![dirpicker gif](https://github.com/synic/telescope-dirpicker.nvim/assets/30906/96d5b331-9c27-45e3-9073-9dfc25dd9de3)
 
 ## But Why?
 
