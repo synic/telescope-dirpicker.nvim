@@ -34,15 +34,15 @@ Install the plugin with your preferred package manager:
 
 ```lua
 {
-  "nvim-telescope/telescope.nvim",
+  'nvim-telescope/telescope.nvim',
   dependencies = {
-    {
-      "synic/telescope-dirpicker.nvim",
-      config = function()
-        require('telescope').load_extension('dirpicker')
-      end,
-    }
+    'synic/telescope-dirpicker.nvim',
   },
+  config = function(_, opts)
+    local telescope = require('telescope')
+    telescope.setup(opts)
+    telescope.load_extension('dirpicker')
+  end,
 },
 ```
 
@@ -55,7 +55,7 @@ To use the directory picker
 ```
 
 ```lua
-require('telescope').extensions.dirpicker.dirpicker({ cwd = "~/Projects/" })
+require('telescope').extensions.dirpicker.dirpicker({ cwd = '~/Projects/' })
 ```
 
 The default "select" action is to open the directory with `:Telescope
@@ -64,10 +64,10 @@ to a function with the signature: `function(dir)`:
 
 ```lua
 require('telescope').extensions.dirpicker.dirpicker({
-  cwd = "~/Projects/",
-  prompt_title = "Projects",
+  cwd = '~/Projects/',
+  prompt_title = 'Projects',
   on_select = function(dir)
-    vim.notify("You selected directory: " .. dir)
+    vim.notify('You selected directory: ' .. dir)
     vim.cmd.tcd(dir)
   end,
 })
