@@ -67,9 +67,10 @@ require('telescope').extensions.dirpicker.dirpicker({
   cwd = '~/Projects/',
   prompt_title = 'Projects',
   on_select = function(dir)
-    vim.notify('You selected directory: ' .. dir)
+    vim.notify('You selected: ' .. dir)
     vim.cmd.tcd(dir)
   end,
+  -- on_select = vim.cmd.edit,  -- to open dir in netrw
 })
 ```
 
