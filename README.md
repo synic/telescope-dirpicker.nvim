@@ -80,7 +80,7 @@ These are the overrideable default picker configuration options:
 
 ```lua
 local opts = {
-  cwd = '.',,
+  cwd = '.',
   prompt_title = 'Pick a Directory',
   enable_preview = true,
   on_select = function(dir)
