@@ -17,26 +17,23 @@ local function get_subdirs(opts)
 	local dir = opts.cwd
 	local subdirs = {}
 
-	local files = {}
-
 	if opts.cmd then
 		local cmd = opts.cmd:gsub("__cwd", vim.fn.resolve(dir))
 		local pfile = io.popen(cmd)
 
 		if pfile ~= nil then
 			for line in pfile:lines() do
-				table.insert(files, line)
+				table.insert(subdirs, line)
 			end
 		end
 	else
 		local gp = opts.glob_pattern:gsub("__cwd", vim.fn.resolve(dir))
-		files = vim.split(vim.fn.glob(gp), "\n", { trimempty = true })
-	end
-
-	for _, file in ipairs(files) do
-		if path.new(file):is_dir() then
-			if file ~= "." and file ~= ".." then
-				table.insert(subdirs, file)
+		local files = vim.split(vim.fn.glob(gp), "\n", { trimempty = true })
+		for _, file in ipairs(files) do
+			if path.new(file):is_dir() then
+				if file ~= "." and file ~= ".." then
+					table.insert(subdirs, file)
+				end
 			end
 		end
 	end
