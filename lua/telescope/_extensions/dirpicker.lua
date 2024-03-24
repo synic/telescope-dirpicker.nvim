@@ -13,15 +13,34 @@ local displayer = require("telescope.pickers.entry_display").create({
 	items = { { width = 30 }, { remaining = true } },
 })
 
-local function get_subdirs(dir)
+local function get_subdirs(opts)
+	local dir = opts.cwd
 	local subdirs = {}
 
-	local files = vim.split(vim.fn.glob(dir .. "/*"), "\n", { trimempty = true })
+	local files = {}
+
+	if opts.cmd then
+		local cmd = opts.cmd:gsub("__cwd", vim.fn.resolve(dir))
+		local pfile = io.popen(cmd)
+
+		if pfile ~= nil then
+			for line in pfile:lines() do
+				table.insert(files, line)
+			end
+		end
+	else
+		local gp = opts.glob_pattern:gsub("__cwd", vim.fn.resolve(dir))
+		files = vim.split(vim.fn.glob(gp), "\n", { trimempty = true })
+	end
+
 	for _, file in ipairs(files) do
 		if path.new(file):is_dir() then
-			table.insert(subdirs, file)
+			if file ~= "." and file ~= ".." then
+				table.insert(subdirs, file)
+			end
 		end
 	end
+
 	return subdirs
 end
 
@@ -31,9 +50,9 @@ end
 
 local function create_finder(opts)
 	return finders.new_table({
-		results = get_subdirs(opts.cwd),
+		results = get_subdirs(opts),
 		entry_maker = function(entry)
-			local name = vim.fn.fnamemodify(entry, ":t")
+			local name = vim.fn.fnamemodify(vim.fn.resolve(entry), ":t")
 			return {
 				display = make_display,
 				name = name,
@@ -72,6 +91,8 @@ local function get_default_opts()
 			builtin.find_files({ cwd = dir })
 		end,
 		enable_preview = true,
+		glob_pattern = "__cwd/*",
+		cmd = nil,
 	}
 end
 
@@ -86,7 +107,7 @@ local function dirpicker(opts)
 			prompt_title = opts.prompt_title or "Pick a Directory",
 			finder = create_finder(opts),
 			previewer = opts.enable_preview and previewers.vim_buffer_cat.new(opts) or false,
-			sorter = opts.sorter or sorters.get_fuzzy_file(),
+			sorter = opts.sorter or sorters.get_fuzzy_file(opts),
 			attach_mappings = function(prompt_bufnr, map)
 				map("n", "t", exec_cb(opts, "tcd"))
 				map("n", "l", exec_cb(opts, "lcd"))
