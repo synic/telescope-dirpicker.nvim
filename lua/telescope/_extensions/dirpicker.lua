@@ -58,10 +58,10 @@ local function exec_cb(_, cmd)
 	end
 end
 
-local function goto_first_dir(opts)
+local function goto_cwd(opts)
 	return function(prompt_bufnr)
 		actions.close(prompt_bufnr)
-		vim.cmd(":edit " .. opts.cwd)
+		vim.cmd.edit(opts.cwd)
 	end
 end
 
@@ -92,13 +92,13 @@ local function dirpicker(opts)
 				map("n", "l", exec_cb(opts, "lcd"))
 				map("n", "c", exec_cb(opts, "cd"))
 				map("n", "e", exec_cb(opts, "edit"))
-				map("n", "d", goto_first_dir(opts))
+				map("n", "d", goto_cwd(opts))
 				map("n", "b", exec_cb(opts, browse))
 				map("i", "<c-t>", exec_cb(opts, "tcd"))
 				map("i", "<c-l>", exec_cb(opts, "lcd"))
 				map("i", "<c-c>", exec_cb(opts, "cd"))
 				map("i", "<c-e>", exec_cb(opts, "edit"))
-				map("i", "<c-d>", goto_first_dir(opts))
+				map("i", "<c-d>", goto_cwd(opts))
 				map("i", "<c-b>", exec_cb(opts, browse))
 
 				local function select()
