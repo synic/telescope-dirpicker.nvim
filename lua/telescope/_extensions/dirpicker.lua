@@ -2,8 +2,9 @@ local telescope = require("telescope")
 local path = require("plenary.path")
 local builtin = require("telescope.builtin")
 local actions = require("telescope.actions")
-local state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
+local config = require("telescope.config").values
+local state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
@@ -13,17 +14,27 @@ local displayer = require("telescope.pickers.entry_display").create({
 	items = { { width = 30 }, { remaining = true } },
 })
 
+local function get_entry_and_close_dialog(prompt_bufnr)
+	local entry = state.get_selected_entry(prompt_bufnr)
+	actions.close(prompt_bufnr)
+	return entry.value
+end
+
 local function get_subdirs(opts)
 	local dir = opts.cwd
 	local subdirs = {}
 
 	if opts.cmd then
-		local cmd = opts.cmd:gsub("__cwd", vim.fn.resolve(dir))
-		local pfile = io.popen(cmd)
+		if type(opts.cmd) == "function" then
+			subdirs = opts.cmd(opts)
+		else
+			local cmd = opts.cmd:gsub("__cwd", vim.fn.resolve(dir))
+			local pfile = io.popen(cmd)
 
-		if pfile ~= nil then
-			for line in pfile:lines() do
-				table.insert(subdirs, line)
+			if pfile ~= nil then
+				for line in pfile:lines() do
+					table.insert(subdirs, line)
+				end
 			end
 		end
 	else
@@ -54,7 +65,7 @@ local function create_finder(opts)
 				display = make_display,
 				name = name,
 				value = entry,
-				ordinal = name .. " " .. entry,
+				ordinal = entry,
 			}
 		end,
 	})
@@ -62,15 +73,14 @@ end
 
 local function exec_cb(_, cmd)
 	return function(prompt_bufnr)
-		local entry = state.get_selected_entry(prompt_bufnr)
-		actions.close(prompt_bufnr)
+		local dir = get_entry_and_close_dialog(prompt_bufnr)
 
 		if type(cmd) == "function" then
-			cmd(entry.value)
+			cmd(dir)
 			return
 		end
 
-		vim.cmd(":" .. cmd .. " " .. entry.value)
+		vim.cmd[cmd](dir)
 	end
 end
 
@@ -120,9 +130,8 @@ local function dirpicker(opts)
 				map("i", "<c-b>", exec_cb(opts, browse))
 
 				local function select()
-					local entry = state.get_selected_entry(prompt_bufnr)
-					actions.close(prompt_bufnr)
-					opts.on_select(entry.value)
+					local dir = get_entry_and_close_dialog(prompt_bufnr)
+					opts.on_select(dir)
 				end
 
 				actions.select_default:replace(select)
