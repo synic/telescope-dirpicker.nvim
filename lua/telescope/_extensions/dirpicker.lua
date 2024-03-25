@@ -3,7 +3,6 @@ local path = require("plenary.path")
 local builtin = require("telescope.builtin")
 local actions = require("telescope.actions")
 local sorters = require("telescope.sorters")
-local config = require("telescope.config").values
 local state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 local pickers = require("telescope.pickers")
@@ -60,7 +59,7 @@ local function create_finder(opts)
 	return finders.new_table({
 		results = get_subdirs(opts),
 		entry_maker = function(entry)
-			local name = vim.fn.fnamemodify(vim.fn.resolve(entry), ":t")
+			local name = vim.fn.fnamemodify(entry, ":t")
 			return {
 				display = make_display,
 				name = name,
