@@ -59,12 +59,21 @@ local function create_finder(opts)
 	return finders.new_table({
 		results = get_subdirs(opts),
 		entry_maker = function(entry)
-			local name = vim.fn.fnamemodify(entry, ":t")
+			local name = ""
+			local p = entry
+
+			if type(entry) == "table" then
+				name = entry.name
+				p = entry.path
+			else
+				name = vim.fn.fnamemodify(entry, ":t")
+			end
+
 			return {
 				display = make_display,
 				name = name,
-				value = entry,
-				ordinal = entry,
+				value = p,
+				ordinal = name,
 			}
 		end,
 	})
