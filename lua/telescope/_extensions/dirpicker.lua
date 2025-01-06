@@ -93,13 +93,6 @@ local function exec_cb(_, cmd)
 	end
 end
 
-local function goto_cwd(opts)
-	return function(prompt_bufnr)
-		actions.close(prompt_bufnr)
-		vim.cmd.edit(opts.cwd)
-	end
-end
-
 local function get_default_opts()
 	return {
 		cwd = ".",
@@ -125,18 +118,16 @@ local function dirpicker(opts)
 			previewer = opts.enable_preview and previewers.vim_buffer_cat.new(opts) or false,
 			sorter = opts.sorter or sorters.get_fuzzy_file(opts),
 			attach_mappings = function(prompt_bufnr, map)
-				map("n", "t", exec_cb(opts, "tcd"))
-				map("n", "l", exec_cb(opts, "lcd"))
-				map("n", "c", exec_cb(opts, "cd"))
-				map("n", "e", exec_cb(opts, "edit"))
-				map("n", "d", goto_cwd(opts))
-				map("n", "b", exec_cb(opts, browse))
-				map("i", "<c-t>", exec_cb(opts, "tcd"))
-				map("i", "<c-l>", exec_cb(opts, "lcd"))
-				map("i", "<c-c>", exec_cb(opts, "cd"))
-				map("i", "<c-e>", exec_cb(opts, "edit"))
-				map("i", "<c-d>", goto_cwd(opts))
-				map("i", "<c-b>", exec_cb(opts, browse))
+				map("n", "t", exec_cb(opts, "tcd"), { desc = "Set tab cwd (:tcd)" })
+				map("n", "l", exec_cb(opts, "lcd"), { desc = "Set buffer cwd (:lcd)" })
+				map("n", "c", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
+				map("n", "e", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
+				map("n", "b", exec_cb(opts, browse), { desc = "Find files in directory" })
+				map("i", "<c-t>", exec_cb(opts, "tcd"), { desc = "Set buffer cwd (:tcd)" })
+				map("i", "<c-l>", exec_cb(opts, "lcd"), { desc = "Set local cwd (:lcd)" })
+				map("i", "<c-c>", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
+				map("i", "<c-e>", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
+				map("i", "<c-b>", exec_cb(opts, browse), { desc = "Find files in directory" })
 
 				local function select()
 					local dir = get_entry_and_close_dialog(prompt_bufnr)
