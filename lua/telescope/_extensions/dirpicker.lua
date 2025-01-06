@@ -106,9 +106,7 @@ local function get_default_opts()
 		on_select = function(dir)
 			builtin.find_files({ cwd = dir })
 		end,
-		mappings = { i = {}, n = {} },
 		enable_preview = true,
-		attach_default_mappings = true,
 		glob_pattern = "__cwd/*",
 		cmd = nil,
 	}
@@ -127,34 +125,18 @@ local function dirpicker(opts)
 			previewer = opts.enable_preview and previewers.vim_buffer_cat.new(opts) or false,
 			sorter = opts.sorter or sorters.get_fuzzy_file(opts),
 			attach_mappings = function(prompt_bufnr, map)
-				if opts.attach_default_mappings then
-					map("n", "t", exec_cb(opts, "tcd"))
-					map("n", "l", exec_cb(opts, "lcd"))
-					map("n", "c", exec_cb(opts, "cd"))
-					map("n", "e", exec_cb(opts, "edit"))
-					map("n", "d", goto_cwd(opts))
-					map("n", "b", exec_cb(opts, browse))
-					map("i", "<c-t>", exec_cb(opts, "tcd"))
-					map("i", "<c-l>", exec_cb(opts, "lcd"))
-					map("i", "<c-c>", exec_cb(opts, "cd"))
-					map("i", "<c-e>", exec_cb(opts, "edit"))
-					map("i", "<c-d>", goto_cwd(opts))
-					map("i", "<c-b>", exec_cb(opts, browse))
-				end
-
-				for key, action in pairs(opts.mappings.i) do
-					map("i", key, function(prompt_bufnr1)
-						local entry = state.get_selected_entry()
-						action(prompt_bufnr1, entry.value)
-					end)
-				end
-
-				for key, action in pairs(opts.mappings.n) do
-					map("n", key, function(prompt_bufnr2)
-						local entry = state.get_selected_entry()
-						action(prompt_bufnr2, entry.value)
-					end)
-				end
+				map("n", "t", exec_cb(opts, "tcd"))
+				map("n", "l", exec_cb(opts, "lcd"))
+				map("n", "c", exec_cb(opts, "cd"))
+				map("n", "e", exec_cb(opts, "edit"))
+				map("n", "d", goto_cwd(opts))
+				map("n", "b", exec_cb(opts, browse))
+				map("i", "<c-t>", exec_cb(opts, "tcd"))
+				map("i", "<c-l>", exec_cb(opts, "lcd"))
+				map("i", "<c-c>", exec_cb(opts, "cd"))
+				map("i", "<c-e>", exec_cb(opts, "edit"))
+				map("i", "<c-d>", goto_cwd(opts))
+				map("i", "<c-b>", exec_cb(opts, browse))
 
 				local function select()
 					local dir = get_entry_and_close_dialog(prompt_bufnr)

@@ -87,8 +87,6 @@ local opts = {
   cwd = ".",
   prompt_title = "Pick a Directory",
   enable_preview = true,
-  attach_default_mappings = true,
-  mappings = { i = {}, n = {} }, -- use to add additional mappings
   on_select = function(dir)
     require("telescope.builtin").find_files({ cwd = dir })
   end,
