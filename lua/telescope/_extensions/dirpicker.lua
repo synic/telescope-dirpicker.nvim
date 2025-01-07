@@ -8,11 +8,6 @@ local previewers = require("telescope.previewers")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 
-local displayer = require("telescope.pickers.entry_display").create({
-	separator = " ",
-	items = { { width = 30 }, { remaining = true } },
-})
-
 local function get_entry_and_close_dialog(prompt_bufnr)
 	local entry = state.get_selected_entry()
 	actions.close(prompt_bufnr)
@@ -52,23 +47,20 @@ local function get_subdirs(opts)
 	return subdirs
 end
 
-local function make_display(entry)
-	return displayer({ entry.name, { entry.value, "Comment" } })
-end
-
 local function create_finder(opts)
+	local displayer = require("telescope.pickers.entry_display").create({
+		separator = opts.displayer.separator,
+		items = { { width = opts.displayer.name_width }, { remaining = true } },
+	})
+
+	local make_display = function(entry)
+		return displayer({ entry.name, { entry.value, "Comment" } })
+	end
+
 	return finders.new_table({
 		results = get_subdirs(opts),
 		entry_maker = function(entry)
-			local name = ""
-			local p = entry
-
-			if type(entry) == "table" then
-				name = entry.name
-				p = entry.path
-			else
-				name = vim.fn.fnamemodify(entry, ":t")
-			end
+			local name, p = type(entry) == "table" and entry.name, entry.path or vim.fn.fnamemodify(entry, ":t")
 
 			return {
 				display = make_display,
@@ -102,6 +94,11 @@ local function get_default_opts()
 		enable_preview = true,
 		glob_pattern = "__cwd/*",
 		cmd = nil,
+		attach_default_mappings = true,
+		displayer = {
+			separator = " ",
+			name_width = 30,
+		},
 	}
 end
 
@@ -118,16 +115,18 @@ local function dirpicker(opts)
 			previewer = opts.enable_preview and previewers.vim_buffer_cat.new(opts) or false,
 			sorter = opts.sorter or sorters.get_fuzzy_file(opts),
 			attach_mappings = function(prompt_bufnr, map)
-				map("n", "t", exec_cb(opts, "tcd"), { desc = "Set tab cwd (:tcd)" })
-				map("n", "l", exec_cb(opts, "lcd"), { desc = "Set buffer cwd (:lcd)" })
-				map("n", "c", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
-				map("n", "e", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
-				map("n", "b", exec_cb(opts, browse), { desc = "Find files in directory" })
-				map("i", "<c-t>", exec_cb(opts, "tcd"), { desc = "Set buffer cwd (:tcd)" })
-				map("i", "<c-l>", exec_cb(opts, "lcd"), { desc = "Set local cwd (:lcd)" })
-				map("i", "<c-c>", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
-				map("i", "<c-e>", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
-				map("i", "<c-b>", exec_cb(opts, browse), { desc = "Find files in directory" })
+				if opts.attach_default_mappings then
+					map("n", "t", exec_cb(opts, "tcd"), { desc = "Set tab cwd (:tcd)" })
+					map("n", "l", exec_cb(opts, "lcd"), { desc = "Set buffer cwd (:lcd)" })
+					map("n", "c", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
+					map("n", "e", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
+					map("n", "b", exec_cb(opts, browse), { desc = "Find files in directory" })
+					map("i", "<c-t>", exec_cb(opts, "tcd"), { desc = "Set buffer cwd (:tcd)" })
+					map("i", "<c-l>", exec_cb(opts, "lcd"), { desc = "Set local cwd (:lcd)" })
+					map("i", "<c-c>", exec_cb(opts, "cd"), { desc = "Set cwd (:cd)" })
+					map("i", "<c-e>", exec_cb(opts, "edit"), { desc = "Open dir in file browser" })
+					map("i", "<c-b>", exec_cb(opts, browse), { desc = "Find files in directory" })
+				end
 
 				local function select()
 					local dir = get_entry_and_close_dialog(prompt_bufnr)
